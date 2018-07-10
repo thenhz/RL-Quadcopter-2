@@ -4,7 +4,7 @@ import numpy as np
 from agents.agent import DDPG
 from task import Task
 
-num_episodes = 100
+num_episodes = 1000
 target_pos = np.array([0., 0., 10.])
 task = Task(target_pos=target_pos)
 agent = DDPG(task)

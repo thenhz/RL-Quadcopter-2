@@ -59,10 +59,6 @@ class DDPG():
         self.tau = 0.01  # for soft update of target parameters
 
     def reset_episode(self):
-        self.noise.reset()
-        state = self.task.reset()
-        self.last_state = state
-        return state
 
         self.score = self.total_reward / float(self.episode_duration) if self.episode_duration else -np.inf
         if self.best_score < self.score:
@@ -84,22 +80,29 @@ class DDPG():
                         header=not os.path.isfile(self.stats_filename))  # write header first time only
 
     def step(self, action, reward, next_state, done):
+
+        #states = self.preprocess_state(states)
+        if self.total_reward:
+            self.total_reward += reward
+        else:
+            self.total_reward = reward
+
+        self.episode_duration += 1
         # Save experience / reward
-        self.memory.add(self.last_state, action, reward, next_state, done)
+        if self.last_states is not None and self.last_action is not None:
+            self.memory.add(self.last_states, self.last_action, reward, next_state, done)
+
+        self.last_states = next_state
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
-            experiences = self.memory.sample()
+            experiences = self.memory.sample(self.batch_size)
             self.learn(experiences)
 
-        # Roll over last state and action
-        self.last_state = next_state
-
-        # save states
         if done:
             self.write_stats([self.episode, self.total_reward])
-
-
+#            if self.save_weights_every and self.episode % self.save_weights_every == 0:
+#                self.save_weights()
 
     def act(self, state):
         """Returns actions for given state(s) as per current policy."""
