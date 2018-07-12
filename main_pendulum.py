@@ -1,16 +1,18 @@
 import gym
 import sys
 from agents.agent import DDPG
-from pendulum_task import PendulumTask
+import numpy as np
+from MountainCar_task import MountainCarTask
 import matplotlib.pyplot as plt
 
-num_episodes = 1000
-task = PendulumTask()
+num_episodes = 200
+task = MountainCarTask()
 agent = DDPG(task)
 
 display_graph = True
 display_freq = 50
 rewards = []
+total_rewards = []
 
 for i_episode in range(1, num_episodes + 1):
     state = agent.reset_episode()  # start a new episode
@@ -45,9 +47,11 @@ for i_episode in range(1, num_episodes + 1):
         #               plt_dynamic(x, y1, y2)
         break
 
+    total_rewards.append(np.average(rewards))
+
     sys.stdout.flush()
 
-plt.plot(rewards)
+plt.plot(total_rewards)
 plt.legend()
 _ = plt.ylim()
 plt.show()
