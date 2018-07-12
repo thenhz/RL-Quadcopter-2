@@ -37,18 +37,12 @@ class Actor:
 
         # Actor has three dense layers with successively smaller number of
         # nodes. Batch normalization and drop-out has also been added.
-        net = layers.Dense(units=200, activation=None)(states)
-        net = layers.BatchNormalization()(net)
+        net = layers.Dense(units=5, activation=None)(states)
+        #net = layers.BatchNormalization()(net)
         net = layers.Activation(activation='relu')(net)
-        net = layers.Dropout(rate=0.3)(net)
-        net = layers.Dense(units=150, activation=None)(net)
-        net = layers.BatchNormalization()(net)
+        #net = layers.Dropout(rate=0.3)(net)
+        net = layers.Dense(units=5, activation=None)(net)
         net = layers.Activation(activation='relu')(net)
-        net = layers.Dropout(rate=0.3)(net)
-        net = layers.Dense(units=100, activation=None)(net)
-        net = layers.BatchNormalization()(net)
-        net = layers.Activation(activation='relu')(net)
-        net = layers.Dropout(rate=0.3)(net)
 
         # Add final output layer with sigmoid activation
         raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
@@ -66,7 +60,7 @@ class Actor:
         loss = K.mean(-action_gradients * actions)
 
         # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=0.02)
+        optimizer = optimizers.Adam(lr=0.01)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],

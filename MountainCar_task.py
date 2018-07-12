@@ -16,14 +16,14 @@ class MountainCarTask():
         """
         # Simulation
         self.sim = gym.make('MountainCarContinuous-v0')
-        self.action_repeat = 1
+        self.action_repeat = 4
 
         self.state_size = self.action_repeat * 2
-        self.action_low = -2
-        self.action_high = 2
+        self.action_low = -1
+        self.action_high = 1
         self.action_size = 2
 
-        self.max_steps = 200
+        self.max_steps = 999
         self.current_steps = 0
 
     def step(self, action):

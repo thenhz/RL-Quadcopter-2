@@ -5,7 +5,7 @@ import numpy as np
 from MountainCar_task import MountainCarTask
 import matplotlib.pyplot as plt
 
-num_episodes = 200
+num_episodes = 1000
 task = MountainCarTask()
 agent = DDPG(task)
 
