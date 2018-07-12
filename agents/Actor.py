@@ -13,7 +13,6 @@ class Actor:
 
     def __init__(self, state_size, action_size, action_low, action_high):
         """Initialize parameters and build model.
-
         Params
         ======
             state_size (int): Dimension of each state
@@ -36,11 +35,20 @@ class Actor:
         # Define input layer (states)
         states = layers.Input(shape=(self.state_size,), name='states')
 
-        # Add hidden layers
-        net = layers.Dense(units=32, activation='relu')(states)
-        net = layers.Dense(units=32, activation='relu')(net)
-
-        # Try different layer sizes, activations, add batch normalization, regularizers, etc.
+        # Actor has three dense layers with successively smaller number of
+        # nodes. Batch normalization and drop-out has also been added.
+        net = layers.Dense(units=200, activation=None)(states)
+        net = layers.BatchNormalization()(net)
+        net = layers.Activation(activation='relu')(net)
+        net = layers.Dropout(rate=0.3)(net)
+        net = layers.Dense(units=150, activation=None)(net)
+        net = layers.BatchNormalization()(net)
+        net = layers.Activation(activation='relu')(net)
+        net = layers.Dropout(rate=0.3)(net)
+        net = layers.Dense(units=100, activation=None)(net)
+        net = layers.BatchNormalization()(net)
+        net = layers.Activation(activation='relu')(net)
+        net = layers.Dropout(rate=0.3)(net)
 
         # Add final output layer with sigmoid activation
         raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
@@ -57,10 +65,8 @@ class Actor:
         action_gradients = layers.Input(shape=(self.action_size,))
         loss = K.mean(-action_gradients * actions)
 
-        # Incorporate any additional losses here (e.g. from regularizers)
-
         # Define optimizer and training function
-        optimizer = optimizers.Adam()
+        optimizer = optimizers.Adam(lr=0.02)
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],

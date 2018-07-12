@@ -2,13 +2,15 @@ import gym
 import sys
 from agents.agent import DDPG
 from pendulum_task import PendulumTask
+import matplotlib.pyplot as plt
 
 num_episodes = 1000
 task = PendulumTask()
 agent = DDPG(task)
 
 display_graph = True
-display_freq = 10
+display_freq = 50
+rewards = []
 
 for i_episode in range(1, num_episodes + 1):
     state = agent.reset_episode()  # start a new episode
@@ -19,6 +21,7 @@ for i_episode in range(1, num_episodes + 1):
     while True:
         action = agent.act(state)
         next_state, reward, done = task.step(action)
+        rewards.append(reward)
         agent.step(action, reward, next_state, done)
         state = next_state
         # within the episode loop
@@ -43,3 +46,8 @@ for i_episode in range(1, num_episodes + 1):
         break
 
     sys.stdout.flush()
+
+plt.plot(rewards)
+plt.legend()
+_ = plt.ylim()
+plt.show()

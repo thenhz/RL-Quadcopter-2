@@ -15,8 +15,8 @@ file_output = 'data.txt'
 num_episodes = 50
 target_pos = np.array([0., 0., 10.])
 
-init_pose = np.array([0., 0., 0., 0., 0., 0.])  # initial pose
-init_velocities = np.array([0., 0., 0.])         # initial velocities
+init_pose = np.array([0., 0., 10., 0., 0., 0.])  # initial pose
+init_velocities = np.array([600., 600., 600.])         # initial velocities
 init_angle_velocities = np.array([0., 0., 0.])   # initial angle velocities
 
 task = Task(init_pose=init_pose, init_velocities=init_velocities, init_angle_velocities=init_angle_velocities, target_pos=target_pos)
@@ -39,8 +39,9 @@ with open(file_output, 'w') as csvfile:
                 writer.writerow(to_write)
 
             if done:
-                print("\rEpisode = {:4d},  total_reward = {:7.3f} (best = {:7.3f}), Z_FINISH = {:4f}, score = {:7.3f} (best = {:7.3f}), duration= {:4d}".format(
-                    i_episode, agent.total_reward, agent.best_total_reward, task.sim.pose[2], agent.score, agent.best_score, agent.episode_duration), end="")  # [debug]
+                #print("\rEpisode = {:4d},  total_reward = {:7.3f} (best = {:7.3f}), Z_FINISH = {:4f}, score = {:7.3f} (best = {:7.3f}), duration= {:4d}".format(
+                #    i_episode, agent.total_reward, agent.best_total_reward, task.sim.pose[2], agent.score, agent.best_score, agent.episode_duration), end="")  # [debug]
+                print("\rEpisode = {:4d}", i_episode)
                 break
         sys.stdout.flush()
 
