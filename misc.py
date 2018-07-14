@@ -4,6 +4,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def plot_flight(flight_path, target_pos, episode=None, fig = None):
     x = flight_path[0]
     y = flight_path[1]

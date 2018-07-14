@@ -3,6 +3,7 @@ from agents.agent import Agent
 import sys
 from task import Task
 from misc import *
+from params import *
 
 num_episodes = 30
 
@@ -11,6 +12,7 @@ init_pos = np.array([0., 0., 0., 0., 0., 0.])
 target_pos = np.array([0., 0., 150.])
 task = Task(init_pose=init_pos, target_pos=target_pos,runtime=10.)
 agent = Agent(task)
+
 
 # save rewards for plotting
 rewards = []

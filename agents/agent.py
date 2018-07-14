@@ -1,9 +1,8 @@
 from agents.actor import Actor
 from agents.critic import Critic
-from agents.ou_noise import OUNoise
-from agents.replay_buffer import ReplayBuffer
 import numpy as np
 
+from params import *
 
 class Agent():
     """Reinforcement Learning agent that learns using DDPG."""
@@ -15,36 +14,32 @@ class Agent():
         self.action_high = task.action_high
 
         # Actor (Policy) Model
-        self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
-        self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
+        actor_local_params = actor_params()
+        actor_target_params = actor_params()
+        self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high,
+                                 params=actor_local_params)
+        self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high,
+                                  params=actor_target_params)
 
         # Critic (Value) Model
-        self.critic_local = Critic(self.state_size, self.action_size)
-        self.critic_target = Critic(self.state_size, self.action_size)
+        critic_local_params = critic_params()
+        critic_target_params = critic_params()
+        self.critic_local = Critic(self.state_size, self.action_size, params=critic_local_params)
+        self.critic_target = Critic(self.state_size, self.action_size, params=critic_target_params)
 
         # Initialize target model parameters with local model parameters
         self.critic_target.model.set_weights(self.critic_local.model.get_weights())
         self.actor_target.model.set_weights(self.actor_local.model.get_weights())
 
+        agent_par = agent_params(self.action_size)
         # Noise process
-        self.exploration_mu = 0
-        self.exploration_theta = 0.15 # same direction
-        self.exploration_sigma = 0.001 # random noise
-        
-        #self.exploration_mu = 0
-        #self.exploration_theta = 0.15
-        #self.exploration_sigma = 0.2
-        
-        self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
-
+        self.noise = agent_par.noise
         # Replay memory
-        self.buffer_size = 100000
-        self.batch_size = 64
-        self.memory = ReplayBuffer(self.buffer_size, self.batch_size)
-
+        self.batch_size = agent_par.batch_size
+        self.memory = agent_par.memory
         # Algorithm parameters
-        self.gamma = 0.99  # discount factor
-        self.tau = 0.1  # for soft update of target parameters
+        self.gamma = agent_par.gamma # discount factor
+        self.tau = agent_par.tau # for soft update of target parameters
 
         
         # Compute the ongoing top score
