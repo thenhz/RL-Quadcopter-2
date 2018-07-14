@@ -1,12 +1,5 @@
-import numpy as np
-from task import Task
-import copy
-
 from keras import layers, models, optimizers
 from keras import backend as K
-import random
-from collections import namedtuple, deque
-
 
 class Actor:
     """Actor (Policy) Model."""
@@ -35,14 +28,12 @@ class Actor:
         # Define input layer (states)
         states = layers.Input(shape=(self.state_size,), name='states')
 
-        # Actor has three dense layers with successively smaller number of
-        # nodes. Batch normalization and drop-out has also been added.
-        net = layers.Dense(units=5, activation=None)(states)
-        #net = layers.BatchNormalization()(net)
-        net = layers.Activation(activation='relu')(net)
-        #net = layers.Dropout(rate=0.3)(net)
-        net = layers.Dense(units=5, activation=None)(net)
-        net = layers.Activation(activation='relu')(net)
+        # Add hidden layers
+        net = layers.Dense(units=32, activation='relu')(states)
+        net = layers.Dense(units=64, activation='relu')(net)
+        net = layers.Dense(units=32, activation='relu')(net)
+
+        # Try different layer sizes, activations, add batch normalization, regularizers, etc.
 
         # Add final output layer with sigmoid activation
         raw_actions = layers.Dense(units=self.action_size, activation='sigmoid',
@@ -59,8 +50,10 @@ class Actor:
         action_gradients = layers.Input(shape=(self.action_size,))
         loss = K.mean(-action_gradients * actions)
 
+        # Incorporate any additional losses here (e.g. from regularizers)
+
         # Define optimizer and training function
-        optimizer = optimizers.Adam(lr=0.01)
+        optimizer = optimizers.Adam()
         updates_op = optimizer.get_updates(params=self.model.trainable_weights, loss=loss)
         self.train_fn = K.function(
             inputs=[self.model.input, action_gradients, K.learning_phase()],

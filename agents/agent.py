@@ -1,11 +1,11 @@
+from agents.actor import Actor
+from agents.critic import Critic
+from agents.ou_noise import OUNoise
+from agents.replay_buffer import ReplayBuffer
 import numpy as np
-from agents import Actor, Critic
-import pandas as pd
-from misc import *
-import os
 
 
-class DDPG():
+class Agent():
     """Reinforcement Learning agent that learns using DDPG."""
     def __init__(self, task):
         self.task = task
@@ -15,21 +15,26 @@ class DDPG():
         self.action_high = task.action_high
 
         # Actor (Policy) Model
-        self.actor_local = Actor.Actor(self.state_size, self.action_size, self.action_low, self.action_high)
-        self.actor_target = Actor.Actor(self.state_size, self.action_size, self.action_low, self.action_high)
+        self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
+        self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
 
         # Critic (Value) Model
-        self.critic_local = Critic.Critic(self.state_size, self.action_size)
-        self.critic_target = Critic.Critic(self.state_size, self.action_size)
+        self.critic_local = Critic(self.state_size, self.action_size)
+        self.critic_target = Critic(self.state_size, self.action_size)
 
         # Initialize target model parameters with local model parameters
         self.critic_target.model.set_weights(self.critic_local.model.get_weights())
         self.actor_target.model.set_weights(self.actor_local.model.get_weights())
 
         # Noise process
-        self.exploration_mu = 0.4
-        self.exploration_theta = 0.3
-        self.exploration_sigma = 0.4
+        self.exploration_mu = 0
+        self.exploration_theta = 0.15 # same direction
+        self.exploration_sigma = 0.001 # random noise
+        
+        #self.exploration_mu = 0
+        #self.exploration_theta = 0.15
+        #self.exploration_sigma = 0.2
+        
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory
@@ -39,12 +44,18 @@ class DDPG():
 
         # Algorithm parameters
         self.gamma = 0.99  # discount factor
-        self.tau = 0.001  # for soft update of target parameters
+        self.tau = 0.1  # for soft update of target parameters
+
+        
+        # Compute the ongoing top score
+        self.top_score = -np.inf
+        self.score = 0
 
     def reset_episode(self):
         self.noise.reset()
         state = self.task.reset()
         self.last_state = state
+        self.score = 0
         return state
 
     def step(self, action, reward, next_state, done):
@@ -59,9 +70,15 @@ class DDPG():
         # Roll over last state and action
         self.last_state = next_state
 
-    def act(self, state):
+        # stats
+        self.score += reward
+        if done:
+            if self.score > self.top_score:
+                self.top_score = self.score
+
+    def act(self, states):
         """Returns actions for given state(s) as per current policy."""
-        state = np.reshape(state, [-1, self.state_size])
+        state = np.reshape(states, [-1, self.state_size])
         action = self.actor_local.model.predict(state)[0]
         return list(action + self.noise.sample())  # add some noise for exploration
 

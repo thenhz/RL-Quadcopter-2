@@ -4,7 +4,7 @@ from physics_sim import PhysicsSim
 class Task():
     """Task (environment) that defines the goal and provides feedback to the agent."""
     def __init__(self, init_pose=None, init_velocities=None, 
-                 init_angle_velocities=None, runtime=5., target_pos=None):
+        init_angle_velocities=None, runtime=5., target_pos=None):
         """Initialize a Task object.
         Params
         ======
@@ -16,49 +16,68 @@ class Task():
         """
         # Simulation
         self.sim = PhysicsSim(init_pose, init_velocities, init_angle_velocities, runtime)
-        self.action_repeat = 6
+        self.action_repeat = 3
 
-        self.state_size = self.action_repeat * 6
-        self.action_low = 800  # constrain propeller speeds to reasonable range
+        # State
+        self.state_size = self.action_repeat * (9)
+        self.action_low = 0
         self.action_high = 900
         self.action_size = 4
 
-        self.total_reward = 0
-
         # Goal
-        self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 10.])
+        self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 150.]) 
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        x = self.sim.pose[0]
-        y = self.sim.pose[1]
-        z = self.sim.pose[2]
+        reward = 0
+        penalty = 0
+        current_position = self.sim.pose[:3]
+        
+        # PENALTIES
+        
+        #penalty for distance from target on x axis
+        penalty += abs(current_position[0]-self.target_pos[0])**2
+        #penaltyfor distance from target on y axis
+        penalty += abs(current_position[1]-self.target_pos[1])**2
+        #penaltyfor distance from target on z axis, weighted as this is more important for this task of hovering at a certain height
+        penalty += 12 * abs(current_position[2]-self.target_pos[2])**2
+        #penalty for uneven takeoff
+        penalty += abs(self.sim.pose[3:6]).sum()
+        #penalty for being far away from target and travelling fast
+        penalty += 50* abs(abs(current_position-self.target_pos).sum() - abs(self.sim.v).sum())
 
-        vz = self.sim.v[2]
+        # REWARDS
+        
+        #ongoing reward for being airbourne
+        if current_position[2] > 0.0:
+            reward += 100
+        #additional reward for flying near the target, where each x,y,z axis needs to be itself close to the target point for the agent to be rewarded
+        if np.sqrt((current_position[0]-self.target_pos[0])**2) < 10 and np.sqrt((current_position[1]-self.target_pos[1])**2) < 10 and np.sqrt((current_position[2]-self.target_pos[2])**2) < 10:
+            reward += 1000
 
-        phi = self.sim.pose[3]
-        theta = self.sim.pose[4]
-        psi = self.sim.pose[5]
+        # TOTAL
+        
+        return reward - (penalty * 0.0002)
 
-        reward = -abs(self.target_pos[2] - z)
-        return reward
-
-    def step(self, rotor_speed):
+    def cur_state(self):
+        state = np.concatenate([np.array(self.sim.pose), np.array(self.sim.v)])
+        return state    
+    
+    def step(self, rotor_speeds):
         """Uses action to obtain next state, reward, done."""
         reward = 0
         pose_all = []
         for _ in range(self.action_repeat):
-            rotor_speeds = rotor_speed * 4 # constrain all rotors to same speed
             done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
-            reward += self.get_reward()
-            pose_all.append(self.sim.pose)
+            reward += self.get_reward() 
+            state = self.cur_state()
+            pose_all.append(self.cur_state())
         next_state = np.concatenate(pose_all)
-        self.total_reward += reward
         return next_state, reward, done
+    
 
     def reset(self):
         """Reset the sim to start a new episode."""
         self.sim.reset()
-        state = np.concatenate([self.sim.pose] * self.action_repeat)
-        self.total_reward = 0
+        state = np.concatenate([self.cur_state()] * self.action_repeat) 
         return state

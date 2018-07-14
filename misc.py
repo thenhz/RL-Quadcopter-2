@@ -1,61 +1,45 @@
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import math
 import numpy as np
-import copy
-from datetime import datetime
-import random
-from collections import namedtuple, deque
+import matplotlib.pyplot as plt
 
+def plot_flight(flight_path, target_pos, episode=None, fig = None):
+    x = flight_path[0]
+    y = flight_path[1]
+    z = flight_path[2]
+    mpl.rcParams['legend.fontsize'] = 15
 
-def get_timestamp(t=None, format='%Y-%m-%d_%H-%M-%S'):
-    """Return timestamp as a string; default: current time, format: YYYY-DD-MM_hh-mm-ss."""
-    if t is None:
-        t = datetime.now()
-    return t.strftime(format)
+    if fig == None:
+        fig = plt.figure()
+        fig.set_size_inches(12, 12)
+    ax = fig.gca(projection='3d')
 
-class ReplayBuffer:
-    """Fixed-size buffer to store experience tuples."""
-
-    def __init__(self, buffer_size, batch_size):
-        """Initialize a ReplayBuffer object.
-        Params
-        ======
-            buffer_size: maximum size of buffer
-            batch_size: size of each training batch
-        """
-        self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
-        self.batch_size = batch_size
-        self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
-
-    def add(self, state, action, reward, next_state, done):
-        """Add a new experience to memory."""
-        e = self.experience(state, action, reward, next_state, done)
-        self.memory.append(e)
-
-    def sample(self, batch_size=64):
-        """Randomly sample a batch of experiences from memory."""
-        return random.sample(self.memory, k=self.batch_size)
-
-    def __len__(self):
-        """Return the current size of internal memory."""
-        return len(self.memory)
-
-
-class OUNoise:
-    """Ornstein-Uhlenbeck process."""
-
-    def __init__(self, size, mu, theta, sigma):
-        """Initialize parameters and noise process."""
-        self.mu = mu * np.ones(size)
-        self.theta = theta
-        self.sigma = sigma
-        self.reset()
-
-    def reset(self):
-        """Reset the internal state (= noise) to mean (mu)."""
-        self.state = copy.copy(self.mu)
-
-    def sample(self):
-        """Update internal state and return it as a noise sample."""
-        x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.random.randn(len(x))
-        self.state = x + dx
-        return self.state
+    ax.plot(x,y,z, label='Flight of the Quadcopter')
+    ax.plot([target_pos[0]], [target_pos[1]], [target_pos[2]], ms=8, lw=2, marker='x', alpha=0.75, label='Target')
+    ax.plot([x[0]],[y[0]],[z[0]] ,    ms=8, lw=2, marker='o', color='g', label='Start')
+    ax.plot([x[-1]],[y[-1]],[z[-1]] , ms=8, lw=2, marker='x', color='g', label='End')
+    #ax.legend()
+    xmax = np.max(x)
+    xmin = np.min(x)
+    ymax = np.max(y)
+    ymin = np.min(y)
+    zmax = np.max(z)
+    zmin = np.min(z)
+    #zmax = np.max(z)
+    plt_buffer = 2
+    pltmax = math.ceil(max(xmax,ymax) + plt_buffer)
+    ax.set_xlim(-pltmax,pltmax)
+    ax.set_ylim(-pltmax,pltmax)
+    #ax.set_zlim(0,pltmax)
+    if episode != None:
+        title_txt = 'Episode ' + str(episode)
+    else:
+        title_txt = 'No Episode'
+    if z[0] > 0:
+        title_txt += '. Flight starts in mid-air at z=' + str(np.round(z[0])) + '. Range Max is ' + str(pltmax)
+    plt.title(title_txt)
+    ax.set_xlabel('X (' + str(round(xmin,1)) + ', ' + str(round(xmax,1)) + ')')
+    ax.set_ylabel('Y (' + str(round(ymin,1)) + ', ' + str(round(ymax,1)) + ')')
+    ax.set_zlabel('Z (' + str(round(zmin,1)) + ', ' + str(round(zmax,1)) + ')')
+    plt.show()
