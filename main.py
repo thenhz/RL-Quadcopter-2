@@ -5,7 +5,7 @@ from task import Task
 from misc import *
 from params import *
 
-num_episodes = 30
+num_episodes = 100
 
 # Quadcopter stands still at the ground and has as target a height of 150 above the sarting point
 init_pos = np.array([0., 0., 0., 0., 0., 0.])

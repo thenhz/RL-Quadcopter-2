@@ -59,8 +59,8 @@ class Agent():
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
-            experiences = self.memory.sample()
-            self.learn(experiences)
+            b_idx, experiences, b_ISWeights = self.memory.sample()
+            self.learn(experiences, b_idx, b_ISWeights)
 
         # Roll over last state and action
         self.last_state = next_state
@@ -77,7 +77,7 @@ class Agent():
         action = self.actor_local.model.predict(state)[0]
         return list(action + self.noise.sample())  # add some noise for exploration
 
-    def learn(self, experiences):
+    def learn(self, experiences, b_idx=None, b_ISWeights=None):
         """Update policy and value parameters using given batch of experience tuples."""
         # Convert experience tuples to separate arrays for each element (states, actions, rewards, etc.)
         states = np.vstack([e.state for e in experiences if e is not None])
@@ -102,6 +102,10 @@ class Agent():
         # Soft-update target models
         self.soft_update(self.critic_local.model, self.critic_target.model)
         self.soft_update(self.actor_local.model, self.actor_target.model)
+
+        if b_idx is not None:
+            self.memory.batch_update(b_idx, np.abs(Q_targets_next - Q_targets))
+
 
     def soft_update(self, local_model, target_model):
         """Soft update model parameters."""

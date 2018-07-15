@@ -2,6 +2,7 @@ from keras import layers, models, optimizers
 from keras import backend as K
 from agents.ou_noise import OUNoise
 from agents.replay_buffer import ReplayBuffer
+from agents.PrioritizedMemory import  Memory
 
 
 class actor_params():
@@ -55,6 +56,7 @@ class agent_params():
         self.buffer_size = 100000
         self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size, self.batch_size)
+        #self.memory = Memory(self.buffer_size, self.batch_size)
 
         # Algorithm parameters
         self.gamma = 0.99  # discount factor
