@@ -39,19 +39,22 @@ class Task():
         #penalty for distance from target on y axis
         penalty += abs(current_position[1]-self.target_pos[1])**2
         #penalty for distance from target on z axis, weighted as this is more important for this task of hovering at a certain height
-        penalty += abs(current_position[2]-self.target_pos[2])**2
+        penalty += 12 * abs(current_position[2]-self.target_pos[2])**2
         #penalty for uneven takeoff
         penalty += abs(self.sim.pose[3:6]).sum()
         #penalty for being far away from target and travelling fast
-        penalty += abs(self.sim.v).sum()
+        penalty += 50* abs(abs(current_position-self.target_pos).sum() - abs(self.sim.v).sum())
         #penalty for having too much different velocities of engines
-        penalty += np.var(self.sim.angular_v)
+        penalty += 13 * np.var(self.sim.angular_v)
 
         # REWARDS
-        
+
         #ongoing reward for being airbourne
         if current_position[2] > 0.0:
-            reward += 10
+            reward += 100
+        #additional reward for flying near the target, where each x,y,z axis needs to be itself close to the target point for the agent to be rewarded
+        if np.sqrt((current_position[0]-self.target_pos[0])**2) < 10 and np.sqrt((current_position[1]-self.target_pos[1])**2) < 10 and np.sqrt((current_position[2]-self.target_pos[2])**2) < 10:
+            reward += 1000
 
         # TOTAL
         
