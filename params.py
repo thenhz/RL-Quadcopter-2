@@ -11,7 +11,7 @@ class actor_params():
         self.lr = 0.001
         self.clipvalue = 0.5
 
-        self.optimizer = optimizers.Adam()
+        self.optimizer = optimizers.Adadelta(decay=0.01)
 
     def build_nn(self, input):
         net = layers.Dense(units=32, activation='relu')(input)
@@ -25,7 +25,7 @@ class critic_params():
         self.lr = 0.001
         self.clipvalue = 0.5
 
-        self.optimizer = optimizers.Adam()
+        self.optimizer = optimizers.Adadelta(decay=0.01)
 
     def build_nn(self, actions, states):
         # Add hidden layer(s) for state pathway

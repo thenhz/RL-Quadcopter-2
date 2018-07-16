@@ -1,4 +1,4 @@
-from agents.actor import Actor
+from agents.Actor import Actor
 from agents.Critic import Critic
 import numpy as np
 

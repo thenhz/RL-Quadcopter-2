@@ -5,8 +5,9 @@ from task import Task
 from misc import *
 from params import *
 
-num_episodes = 40
+num_episodes = 50
 
+full_graphs = True
 
 # Quadcopter stands still at the ground and has as target a height of 150 above the sarting point
 init_pos = np.array([0., 0., 0., 0., 0., 0.])
@@ -84,35 +85,35 @@ with open(file_output, 'w') as csvfile:
 
 import matplotlib.pyplot as plt
 
+if full_graphs:
+    plt.plot(results['time'], results['x'], label='x')
+    plt.plot(results['time'], results['y'], label='y')
+    plt.plot(results['time'], results['z'], label='z')
+    plt.legend()
+    _ = plt.ylim()
+    plt.show()
 
-plt.plot(results['time'], results['x'], label='x')
-plt.plot(results['time'], results['y'], label='y')
-plt.plot(results['time'], results['z'], label='z')
-plt.legend()
-_ = plt.ylim()
-plt.show()
+    #Plot flight in 3d
+    plot_flight([results['x'], results['y'], results['z']], target_pos)
 
-#Plot flight in 3d
-plot_flight([results['x'], results['y'], results['z']], target_pos)
+    plt.plot(results['time'], results['x_velocity'], label='x_velocity')
+    plt.plot(results['time'], results['y_velocity'], label='y_velocity')
+    plt.plot(results['time'], results['z_velocity'], label='z_velocity')
+    plt.legend()
+    _ = plt.ylim()
+    plt.show()
 
-plt.plot(results['time'], results['x_velocity'], label='x_hat')
-plt.plot(results['time'], results['y_velocity'], label='y_hat')
-plt.plot(results['time'], results['z_velocity'], label='z_hat')
-plt.legend()
-_ = plt.ylim()
-plt.show()
+    plt.plot(results['time'], results['phi'], label='phi')
+    plt.plot(results['time'], results['theta'], label='theta')
+    plt.plot(results['time'], results['psi'], label='psi')
+    plt.legend()
+    _ = plt.ylim()
+    plt.show()
 
-plt.plot(results['time'], results['phi'], label='phi')
-plt.plot(results['time'], results['theta'], label='theta')
-plt.plot(results['time'], results['psi'], label='psi')
-plt.legend()
-_ = plt.ylim()
-plt.show()
-
-plt.plot(results['time'], results['rotor_speed1'], label='Rotor 1 revolutions / second')
-plt.plot(results['time'], results['rotor_speed2'], label='Rotor 2 revolutions / second')
-plt.plot(results['time'], results['rotor_speed3'], label='Rotor 3 revolutions / second')
-plt.plot(results['time'], results['rotor_speed4'], label='Rotor 4 revolutions / second')
-plt.legend()
-_ = plt.ylim()
-plt.show()
+    plt.plot(results['time'], results['rotor_speed1'], label='Rotor 1 revolutions / second')
+    plt.plot(results['time'], results['rotor_speed2'], label='Rotor 2 revolutions / second')
+    plt.plot(results['time'], results['rotor_speed3'], label='Rotor 3 revolutions / second')
+    plt.plot(results['time'], results['rotor_speed4'], label='Rotor 4 revolutions / second')
+    plt.legend()
+    _ = plt.ylim()
+    plt.show()
