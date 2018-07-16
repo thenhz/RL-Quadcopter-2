@@ -1,5 +1,5 @@
 from agents.actor import Actor
-from agents.critic import Critic
+from agents.Critic import Critic
 import numpy as np
 
 from params import *

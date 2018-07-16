@@ -37,9 +37,9 @@ class Task():
         
         #penalty for distance from target on x axis
         penalty += abs(current_position[0]-self.target_pos[0])**2
-        #penaltyfor distance from target on y axis
+        #penalty for distance from target on y axis
         penalty += abs(current_position[1]-self.target_pos[1])**2
-        #penaltyfor distance from target on z axis, weighted as this is more important for this task of hovering at a certain height
+        #penalty for distance from target on z axis, weighted as this is more important for this task of hovering at a certain height
         penalty += 12 * abs(current_position[2]-self.target_pos[2])**2
         #penalty for uneven takeoff
         penalty += abs(self.sim.pose[3:6]).sum()

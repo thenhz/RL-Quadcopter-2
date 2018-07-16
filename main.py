@@ -5,7 +5,8 @@ from task import Task
 from misc import *
 from params import *
 
-num_episodes = 100
+num_episodes = 40
+
 
 # Quadcopter stands still at the ground and has as target a height of 150 above the sarting point
 init_pos = np.array([0., 0., 0., 0., 0., 0.])
@@ -16,6 +17,7 @@ agent = Agent(task)
 
 # save rewards for plotting
 rewards = []
+rotor_speeds_var = []
 
 for i_episode in range(1, num_episodes+1):
     state = agent.reset_episode() # start a new episode
@@ -28,6 +30,7 @@ for i_episode in range(1, num_episodes+1):
         state = next_state
         if done:
             rewards.append(agent.score)
+            rotor_speeds_var.append(np.var(action))
             print("\r\nEp={:4d}, score={:7.3f} (top={:7.3f}) pos={} {} {} {} {} {} {}".format(
                 i_episode,
                 agent.score,
@@ -45,8 +48,10 @@ for i_episode in range(1, num_episodes+1):
 import matplotlib.pyplot as plt
 import csv
 
-## TODO: Plot the rewards.
+## Plot the rewards.
 plt.plot(rewards, label='rewards')
+plt.plot(rotor_speeds_var, label='rotor var')
+plt.show()
 
 runtime = 25.                                     # time limit of the episode
 init_pose = np.array([0., 0., 0., 0., 0., 0.])  # initial pose
@@ -79,6 +84,7 @@ with open(file_output, 'w') as csvfile:
 
 import matplotlib.pyplot as plt
 
+
 plt.plot(results['time'], results['x'], label='x')
 plt.plot(results['time'], results['y'], label='y')
 plt.plot(results['time'], results['z'], label='z')
@@ -86,6 +92,7 @@ plt.legend()
 _ = plt.ylim()
 plt.show()
 
+#Plot flight in 3d
 plot_flight([results['x'], results['y'], results['z']], target_pos)
 
 plt.plot(results['time'], results['x_velocity'], label='x_hat')
