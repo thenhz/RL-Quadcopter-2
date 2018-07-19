@@ -5,7 +5,7 @@ from task import Task
 from misc import *
 from params import *
 
-num_episodes = 100
+num_episodes = 1000
 
 full_graphs = False
 
@@ -51,7 +51,7 @@ import csv
 
 ## Plot the rewards.
 plt.plot(rewards, label='rewards')
-plt.plot(rotor_speeds_var, label='rotor var')
+#plt.plot(rotor_speeds_var, label='rotor var')
 plt.show()
 
 runtime = 25.                                     # time limit of the episode
